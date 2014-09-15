@@ -10,12 +10,14 @@ import android.view.View;
 import android.widget.AdapterView;
 import android.widget.EditText;
 import android.widget.GridView;
+import android.widget.Toast;
 
 import com.loopj.android.http.AsyncHttpClient;
 import com.loopj.android.http.JsonHttpResponseHandler;
 import com.yahoo.workmonk.gridimagesearch.adapters.ImageResultsAdapter;
 import com.yahoo.workmonk.gridimagesearch.models.ImageResult;
 import com.yahoo.workmonk.gridimagesearch.R;
+import com.yahoo.workmonk.gridimagesearch.models.Settings;
 
 import org.apache.http.Header;
 import org.json.JSONArray;
@@ -30,6 +32,7 @@ public class SearchActivity extends Activity {
     private GridView gvResults;
     private ArrayList<ImageResult> imageResults;
     private ImageResultsAdapter aImageResults;
+    private Settings settings = null;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -39,6 +42,8 @@ public class SearchActivity extends Activity {
         imageResults = new ArrayList<ImageResult>();
         aImageResults = new ImageResultsAdapter(this, imageResults);
         gvResults.setAdapter(aImageResults);
+        if(settings==null)
+            settings = new Settings();
     }
 
     private void setupViews() {
@@ -64,7 +69,8 @@ public class SearchActivity extends Activity {
         String query = etQuery.getText().toString();
         AsyncHttpClient client = new AsyncHttpClient();
         String searchUrl = "https://ajax.googleapis.com/ajax/services/search/images?q=" + query + "&v=1.0&rsz=8";
-        client.get(searchUrl, new JsonHttpResponseHandler(){
+        String finalUrl = addSettingsToUrl(searchUrl);
+        client.get(finalUrl, new JsonHttpResponseHandler(){
             @Override
             public void onSuccess(int statusCode, Header[] headers, JSONObject response) {
                 JSONArray imageResultsJson = null;
@@ -78,6 +84,41 @@ public class SearchActivity extends Activity {
                 Log.i("INFO", imageResults.toString());
             }
         });
+    }
+
+    public void launchSettingsMenu(MenuItem mi) {
+        Intent i = new Intent(this, SettingsActivity.class);
+        i.putExtra("settings", settings);
+        startActivityForResult(i, 5);
+    }
+
+    @Override
+    protected void onActivityResult(int requestCode, int resultCode, Intent data) {
+        if (requestCode == 5 && resultCode == RESULT_OK){
+            Settings settings1 = (Settings) data.getSerializableExtra("settings");
+            settings = settings1;
+        }
+    }
+
+    private String addSettingsToUrl(String searchUrl){
+        if(settings.imageType!=null && settings.imageType!="" && settings.imageType!="Any"){
+            searchUrl = searchUrl + "&imgtype=" + settings.imageType;
+        }
+
+        if(settings.imageSize!=null && settings.imageSize!="" && settings.imageSize!="Any"){
+            searchUrl = searchUrl + "&imgsz=" + settings.imageSize;
+        }
+
+        if(settings.colorFilter!=null && settings.colorFilter!="" && settings.colorFilter!="Any"){
+            searchUrl = searchUrl + "&imgcolor=" + settings.colorFilter;
+        }
+
+        if(settings.siteFilter!=null && settings.siteFilter!="" && settings.siteFilter!="Any"){
+            searchUrl = searchUrl + "&as_sitesearch=" + settings.siteFilter;
+        }
+
+
+        return searchUrl;
     }
 
 

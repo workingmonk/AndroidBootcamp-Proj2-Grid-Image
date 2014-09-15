@@ -3,6 +3,7 @@
     tools:context=".SearchActivity" >
     <item android:id="@+id/action_settings"
         android:title="@string/action_settings"
+        android:onClick="launchSettingsMenu"
         android:orderInCategory="100"
         android:showAsAction="never" />
 </menu>

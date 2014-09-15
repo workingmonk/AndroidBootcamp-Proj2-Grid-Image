@@ -10,5 +10,47 @@
     <string name="image_results">Image Results</string>
     <string name="title_activity_image_display">Full Image</string>
     <string name="full_image_description">Full Screen Image</string>
+    <string name="title_activity_settings">SettingsActivity</string>
+    <string name="settings_title">Advanced Search Options</string>
+    <string name="image_size_label">Image Size</string>
+    <string name="color_filter_label">Color Filter</string>
+    <string name="image_type_label">Image Type</string>
+    <string name="settings_save_label">Save</string>
+
+    <string-array name="image_size">
+        <item>Any</item>
+        <item>icon</item>
+        <item>small</item>
+        <item>medium</item>
+        <item>large</item>
+        <item>xlarge</item>
+        <item>xxlarge</item>
+        <item>huge</item>
+    </string-array>
+
+    <string-array name="color_filter">
+        <item>Any</item>
+        <item>black</item>
+        <item>blue</item>
+        <item>brown</item>
+        <item>gray</item>
+        <item>green</item>
+        <item>orange</item>
+        <item>pink</item>
+        <item>purple</item>
+        <item>red</item>
+        <item>teal</item>
+        <item>white</item>
+        <item>yellow</item>
+    </string-array>
+
+    <string-array name="image_type">
+        <item>Any</item>
+        <item>face</item>
+        <item>photo</item>
+        <item>clipart</item>
+        <item>lineart</item>
+    </string-array>
+
 
 </resources>
