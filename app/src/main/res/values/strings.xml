@@ -16,6 +16,8 @@
     <string name="color_filter_label">Color Filter</string>
     <string name="image_type_label">Image Type</string>
     <string name="settings_save_label">Save</string>
+    <string name="site_filter_label">Site Filter</string>
+    <string name="site_filter_hint">e.g.: flickr.com</string>
 
     <string-array name="image_size">
         <item>Any</item>

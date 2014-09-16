@@ -87,7 +87,7 @@
         android:layout_height="wrap_content"
         android:paddingTop="15dp"
         android:textAppearance="?android:attr/textAppearanceMedium"
-        android:text="Medium Text"
+        android:text="@string/site_filter_label"
         android:id="@+id/tvSiteName"
         android:layout_below="@+id/spnrImageType"
         android:layout_alignParentLeft="true"
@@ -96,14 +96,14 @@
     <EditText
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:paddingTop="15dp"
         android:id="@+id/etSiteNameValue"
         android:layout_alignBottom="@+id/tvSiteName"
         android:layout_toRightOf="@+id/tvSiteName"
         android:layout_toEndOf="@+id/tvSiteName"
         android:layout_alignParentRight="true"
         android:layout_alignParentEnd="true"
-        android:layout_below="@+id/spnrImageType" />
+        android:layout_below="@+id/spnrImageType"
+        android:hint="@string/site_filter_hint" />
 
     <Button
         android:layout_width="wrap_content"

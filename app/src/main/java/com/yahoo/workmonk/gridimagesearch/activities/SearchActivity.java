@@ -14,6 +14,7 @@ import android.widget.Toast;
 
 import com.loopj.android.http.AsyncHttpClient;
 import com.loopj.android.http.JsonHttpResponseHandler;
+import com.yahoo.workmonk.gridimagesearch.adapters.EndlessScrollListener;
 import com.yahoo.workmonk.gridimagesearch.adapters.ImageResultsAdapter;
 import com.yahoo.workmonk.gridimagesearch.models.ImageResult;
 import com.yahoo.workmonk.gridimagesearch.R;
@@ -24,6 +25,8 @@ import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 
+import java.io.UnsupportedEncodingException;
+import java.net.URLEncoder;
 import java.util.ArrayList;
 
 
@@ -42,9 +45,16 @@ public class SearchActivity extends Activity {
         imageResults = new ArrayList<ImageResult>();
         aImageResults = new ImageResultsAdapter(this, imageResults);
         gvResults.setAdapter(aImageResults);
+        gvResults.setOnScrollListener(new EndlessScrollListener() {
+            @Override
+            public void onLoadMore(int page, int totalItemsCount) {
+                loadMoreDataFromApi(page);
+            }
+        });
         if(settings==null)
             settings = new Settings();
     }
+
 
     private void setupViews() {
         etQuery = (EditText) findViewById(R.id.etQuery);
@@ -66,22 +76,60 @@ public class SearchActivity extends Activity {
     }
 
     public void onImageSearch(View v) {
+        onImageSearchInfinite(v, 0);
+    }
+
+    public void onImageSearchInfinite(View v, final int startIndex){
         String query = etQuery.getText().toString();
         AsyncHttpClient client = new AsyncHttpClient();
         String searchUrl = "https://ajax.googleapis.com/ajax/services/search/images?q=" + query + "&v=1.0&rsz=8";
+        if(startIndex!=0){
+            searchUrl = searchUrl + "&start=" + startIndex;
+        }
         String finalUrl = addSettingsToUrl(searchUrl);
+        try {
+            finalUrl = URLEncoder.encode(finalUrl, "UTF-8")
+                    .replaceAll("\\%28", "(")
+                    .replaceAll("\\%29", ")")
+                    .replaceAll("\\+", "%20")
+                    .replaceAll("\\%27", "'")
+                    .replaceAll("\\%21", "!")
+                    .replaceAll("\\%7E", "~")
+                    .replaceAll("\\%3A", ":")
+                    .replaceAll("\\%2F", "/")
+                    .replaceAll("\\%3F", "?")
+                    .replaceAll("\\%3D", "=")
+                    .replaceAll("\\%26", "&");
+        } catch (UnsupportedEncodingException e) {
+            e.printStackTrace();
+            Toast.makeText(this, "Search string is invalid", Toast.LENGTH_SHORT).show();
+            return;
+        }
+        Log.i("FINAL URL", finalUrl);
         client.get(finalUrl, new JsonHttpResponseHandler(){
             @Override
             public void onSuccess(int statusCode, Header[] headers, JSONObject response) {
                 JSONArray imageResultsJson = null;
                 try {
                     imageResultsJson = response.getJSONObject("responseData").getJSONArray("results");
-                    imageResults.clear(); //clear when new search
+                    if(startIndex==0) {
+                        imageResults.clear(); //clear when new search
+                    }
                     aImageResults.addAll(ImageResult.fromJsonArray(imageResultsJson));
                 } catch (JSONException e) {
                     e.printStackTrace();
                 }
                 Log.i("INFO", imageResults.toString());
+            }
+
+            @Override
+            public void onFailure(int statusCode, Header[] headers, Throwable throwable, JSONObject errorResponse) {
+                Log.d("STATUS CODE", String.valueOf(statusCode));
+                if(!isOnline()) {
+                    Toast.makeText(SearchActivity.this, "No Internet Connectivity", Toast.LENGTH_SHORT).show();
+                } else {
+                    Toast.makeText(SearchActivity.this, "No Results, check query", Toast.LENGTH_SHORT).show();
+                }
             }
         });
     }
@@ -121,7 +169,23 @@ public class SearchActivity extends Activity {
         return searchUrl;
     }
 
+    public void loadMoreDataFromApi(int page){
+        int startIndex = page * 8;
+        onImageSearchInfinite(null, startIndex);
+    }
 
+    public Boolean isOnline() {
+        try {
+            Process p1 = java.lang.Runtime.getRuntime().exec("ping -c 1 www.google.com");
+            int returnVal = p1.waitFor();
+            boolean reachable = (returnVal==0);
+            return reachable;
+        } catch (Exception e) {
+            // TODO Auto-generated catch block
+            e.printStackTrace();
+        }
+        return false;
+    }
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
         // Inflate the menu; this adds items to the action bar if it is present.
