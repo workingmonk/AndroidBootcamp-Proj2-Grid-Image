@@ -9,6 +9,7 @@ import android.view.View;
 import android.widget.ArrayAdapter;
 import android.widget.EditText;
 import android.widget.Spinner;
+import android.widget.TextView;
 
 import com.yahoo.workmonk.gridimagesearch.R;
 import com.yahoo.workmonk.gridimagesearch.models.Settings;
@@ -24,9 +25,13 @@ public class SettingsActivity extends Activity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_settings);
-        setupSpinners();
-        etSiteFilter = (EditText) findViewById(R.id.etSiteNameValue);
         settings = (Settings) getIntent().getSerializableExtra("settings");
+        setupSpinners();
+
+        etSiteFilter = (EditText) findViewById(R.id.etSiteNameValue);
+        if(settings.siteFilter!=null && !settings.siteFilter.equals("")) {
+            etSiteFilter.setText(settings.siteFilter, TextView.BufferType.EDITABLE);
+        }
     }
 
 
@@ -37,6 +42,12 @@ public class SettingsActivity extends Activity {
                 R.array.image_size, android.R.layout.simple_spinner_item);
         adapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
         imageSizeSpnr.setAdapter(adapter);
+        if(settings.imageSize!=null && !settings.imageSize.equals("Any")){
+            ArrayAdapter tempAdapter = (ArrayAdapter) imageSizeSpnr.getAdapter();
+            int spinnerPosition = tempAdapter.getPosition(settings.imageSize);
+            imageSizeSpnr.setSelection(spinnerPosition);
+        }
+
 
         //Color Filter
         colorFilterSpnr = (Spinner) findViewById(R.id.spnrColorFilter);
@@ -44,6 +55,13 @@ public class SettingsActivity extends Activity {
                 R.array.color_filter, android.R.layout.simple_spinner_item);
         adapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
         colorFilterSpnr.setAdapter(adapter);
+        if(settings.colorFilter!=null && !settings.colorFilter.equals("Any")){
+            ArrayAdapter tempAdapter = (ArrayAdapter) colorFilterSpnr.getAdapter();
+            int spinnerPosition = tempAdapter.getPosition(settings.colorFilter);
+            colorFilterSpnr.setSelection(spinnerPosition);
+        }
+
+
 
         //Image Type
         imageTypeSpnr = (Spinner) findViewById(R.id.spnrImageType);
@@ -51,6 +69,13 @@ public class SettingsActivity extends Activity {
                 R.array.image_type, android.R.layout.simple_spinner_item);
         adapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
         imageTypeSpnr.setAdapter(adapter);
+        if(settings.imageType!=null && !settings.imageType.equals("Any")){
+            ArrayAdapter tempAdapter = (ArrayAdapter) imageTypeSpnr.getAdapter();
+            int spinnerPosition = tempAdapter.getPosition(settings.imageType);
+            imageTypeSpnr.setSelection(spinnerPosition);
+        }
+
+
     }
 
     public void onSaveSubmit(View v){

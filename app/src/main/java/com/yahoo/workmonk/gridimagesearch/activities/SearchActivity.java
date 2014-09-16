@@ -87,51 +87,40 @@ public class SearchActivity extends Activity {
             searchUrl = searchUrl + "&start=" + startIndex;
         }
         String finalUrl = addSettingsToUrl(searchUrl);
-        try {
-            finalUrl = URLEncoder.encode(finalUrl, "UTF-8")
-                    .replaceAll("\\%28", "(")
-                    .replaceAll("\\%29", ")")
-                    .replaceAll("\\+", "%20")
-                    .replaceAll("\\%27", "'")
-                    .replaceAll("\\%21", "!")
-                    .replaceAll("\\%7E", "~")
-                    .replaceAll("\\%3A", ":")
-                    .replaceAll("\\%2F", "/")
-                    .replaceAll("\\%3F", "?")
-                    .replaceAll("\\%3D", "=")
-                    .replaceAll("\\%26", "&");
-        } catch (UnsupportedEncodingException e) {
-            e.printStackTrace();
-            Toast.makeText(this, "Search string is invalid", Toast.LENGTH_SHORT).show();
-            return;
-        }
-        Log.i("FINAL URL", finalUrl);
-        client.get(finalUrl, new JsonHttpResponseHandler(){
-            @Override
-            public void onSuccess(int statusCode, Header[] headers, JSONObject response) {
-                JSONArray imageResultsJson = null;
-                try {
-                    imageResultsJson = response.getJSONObject("responseData").getJSONArray("results");
-                    if(startIndex==0) {
-                        imageResults.clear(); //clear when new search
-                    }
-                    aImageResults.addAll(ImageResult.fromJsonArray(imageResultsJson));
-                } catch (JSONException e) {
-                    e.printStackTrace();
-                }
-                Log.i("INFO", imageResults.toString());
-            }
+        finalUrl = finalUrl.replaceAll("\\+", "%20");
 
-            @Override
-            public void onFailure(int statusCode, Header[] headers, Throwable throwable, JSONObject errorResponse) {
-                Log.d("STATUS CODE", String.valueOf(statusCode));
-                if(!isOnline()) {
-                    Toast.makeText(SearchActivity.this, "No Internet Connectivity", Toast.LENGTH_SHORT).show();
-                } else {
-                    Toast.makeText(SearchActivity.this, "No Results, check query", Toast.LENGTH_SHORT).show();
+        Log.i("FINAL URL", finalUrl);
+        try {
+            client.get(finalUrl, new JsonHttpResponseHandler() {
+                @Override
+                public void onSuccess(int statusCode, Header[] headers, JSONObject response) {
+                    JSONArray imageResultsJson = null;
+                    try {
+                        imageResultsJson = response.getJSONObject("responseData").getJSONArray("results");
+                        if (startIndex == 0) {
+                            imageResults.clear(); //clear when new search
+                        }
+                        aImageResults.addAll(ImageResult.fromJsonArray(imageResultsJson));
+                    } catch (JSONException e) {
+                        e.printStackTrace();
+                        Toast.makeText(SearchActivity.this, "No Results, check query", Toast.LENGTH_SHORT).show();
+                    }
+                    Log.i("INFO", imageResults.toString());
                 }
-            }
-        });
+
+                @Override
+                public void onFailure(int statusCode, Header[] headers, Throwable throwable, JSONObject errorResponse) {
+                    Log.d("STATUS CODE", String.valueOf(statusCode));
+                    if (!isOnline()) {
+                        Toast.makeText(SearchActivity.this, "No Internet Connectivity", Toast.LENGTH_SHORT).show();
+                    } else {
+                        Toast.makeText(SearchActivity.this, "No Results, check query", Toast.LENGTH_SHORT).show();
+                    }
+                }
+            });
+        } catch (Exception e){
+            Toast.makeText(SearchActivity.this, "No Results, check query", Toast.LENGTH_SHORT).show();
+        }
     }
 
     public void launchSettingsMenu(MenuItem mi) {
@@ -145,6 +134,7 @@ public class SearchActivity extends Activity {
         if (requestCode == 5 && resultCode == RESULT_OK){
             Settings settings1 = (Settings) data.getSerializableExtra("settings");
             settings = settings1;
+            onImageSearchInfinite(null, 0);
         }
     }
 
